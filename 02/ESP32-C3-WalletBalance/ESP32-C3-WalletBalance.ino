@@ -60,31 +60,45 @@ void setup() {
 
 // loop() runs repeatedly after setup
 void loop() {
-  static bool apiCalled = false;
-  if (!apiCalled) {
-    if (WiFi.status() == WL_CONNECTED) {
-      // Prepare a DynamicJsonDocument for the response (adjust size as needed)
-      DynamicJsonDocument doc(2048);
-      const char* url = "https://api.koios.rest/api/v1/account_info";
-      const char* postData = "{\"_stake_addresses\":[\"stake1uyrx65wjqjgeeksd8hptmcgl5jfyrqkfq0xe8xlp367kphsckq250\"]}";
-      Serial.println("Calling Koios API for account info...");
-      if (httpsPostJson(url, postData, doc)) {
-        // Print only the total_balance from the first array element
-        if (doc.is<JsonArray>() && doc.size() > 0 && doc[0]["total_balance"]) {
-          const char* total_balance = doc[0]["total_balance"];
-          Serial.print("Wallet Balance (Lovelace): ");
-          Serial.println(total_balance);
-        } else {
-          Serial.println("Could not find total_balance in response.");
-        }
+  static unsigned long lastApiCall = 0;
+  const unsigned long apiInterval = 30000; // 30 seconds
+  
+  if (WiFi.status() == WL_CONNECTED && (millis() - lastApiCall >= apiInterval)) {
+    // Get current time for timestamp
+    time_t now = time(nullptr);
+    struct tm timeinfo;
+    gmtime_r(&now, &timeinfo);
+    char timestamp[64];
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S UTC", &timeinfo);
+    
+    // Prepare a DynamicJsonDocument for the response (adjust size as needed)
+    DynamicJsonDocument doc(2048);
+    const char* url = "https://api.koios.rest/api/v1/account_info";
+    const char* postData = "{\"_stake_addresses\":[\"stake1uyrx65wjqjgeeksd8hptmcgl5jfyrqkfq0xe8xlp367kphsckq250\"]}";
+    Serial.println("Calling Koios API for account info...");
+    if (httpsPostJson(url, postData, doc)) {
+      // Print only the total_balance from the first array element
+      if (doc.is<JsonArray>() && doc.size() > 0 && doc[0]["total_balance"]) {
+        const char* total_balance = doc[0]["total_balance"];
+        Serial.print("[");
+        Serial.print(timestamp);
+        Serial.print("] Wallet Balance (Lovelace): ");
+        Serial.println(total_balance);
       } else {
-        Serial.println("API call or JSON parse failed.");
+        Serial.print("[");
+        Serial.print(timestamp);
+        Serial.println("] Could not find total_balance in response.");
       }
-      apiCalled = true;
     } else {
-      Serial.println("WiFi not connected. Skipping API call.");
-      delay(1000); // Wait and retry WiFi check
+      Serial.print("[");
+      Serial.print(timestamp);
+      Serial.println("] API call or JSON parse failed.");
     }
+    lastApiCall = millis();
+  } else if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected. Skipping API call.");
+    delay(1000); // Wait and retry WiFi check
   }
-  // Do nothing after the call
+  
+  delay(1000); // Small delay to prevent busy looping
 }

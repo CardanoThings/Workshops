@@ -1,15 +1,15 @@
 
 # ESP32-C3 Wallet Balance Example
 
-This project demonstrates how to connect an ESP32-C3 to WiFi, synchronize time using NTP, make a secure HTTPS POST request to the Cardano Koios API, and parse the JSON response using ArduinoJson. The example retrieves and prints the total balance of a Cardano stake address to the Serial console.
+This project demonstrates how to connect an ESP32-C3 to WiFi, synchronize time using NTP, make a secure HTTPS POST request to the Cardano Koios API, and parse the JSON response using ArduinoJson. The example continuously retrieves and prints the total balance of a Cardano stake address to the Serial console every 30 seconds with timestamps.
 
 ## Features
 
 - Connects to WiFi using credentials from `secrets.h`
 - Synchronizes time via NTP (required for HTTPS/TLS)
-- Makes an HTTPS POST request to `https://api.koios.rest/api/v1/account_info`
+- Makes an HTTPS POST request to `https://api.koios.rest/api/v1/account_info` every 30 seconds
 - Handles HTTP chunked transfer encoding
-- Parses and prints the `total_balance` value from the JSON response
+- Parses and prints the `total_balance` value from the JSON response with timestamps
 
 ## Hardware Requirements
 
@@ -53,7 +53,9 @@ Waiting for NTP time sync...
 Time synchronized with NTP.
 Current time: 2025-08-04 14:35:12 UTC
 Calling Koios API for account info...
-total_balance: 1234567890
+[2025-08-04 14:35:15 UTC] Wallet Balance (Lovelace): 1234567890
+Calling Koios API for account info...
+[2025-08-04 14:35:45 UTC] Wallet Balance (Lovelace): 1234567890
 ```
 
 ## Troubleshooting
