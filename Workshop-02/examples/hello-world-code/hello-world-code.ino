@@ -5,6 +5,9 @@
 			// Create TFT display object
 			TFT_eSPI tft = TFT_eSPI();
 
+			// Define custom gray color (RGB565 format: 5 bits red, 6 bits green, 5 bits blue)
+			#define TFT_GRAY 0x7BEF
+
 			void setup() {
 				// Initialize serial communication for debugging
 				Serial.begin(115200);
