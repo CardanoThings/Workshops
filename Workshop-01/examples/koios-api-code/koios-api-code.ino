@@ -6,6 +6,8 @@
             const char* password = "Your Password"; // Your WiFi Password
             const char* apiUrl = "https://preprod.koios.rest/api/v1/tip"; // The API URL for the Koios API
 
+            int epochNumber = 0; // Variable to store the epoch number
+
             void setup() {
                 Serial.begin(115200); // Initialize the serial communication at 115200 baud rate
                 WiFi.begin(ssid, password); // Connect to WiFi using the SSID and Password
@@ -17,6 +19,20 @@
                 Serial.println("Connected to WiFi"); // Print "Connected to WiFi" to the serial monitor
                 Serial.println("IP address: "); // Print "IP address: " to the serial monitor
                 Serial.println(WiFi.localIP()); // Print the IP address to the serial monitor
+            }
+
+            void parseJsonResponse(String response) {
+                JsonDocument doc; // Create a JSON document
+                DeserializationError error = deserializeJson(doc, response); // Deserialize the JSON response
+                
+                if (error) {
+                    Serial.print("Failed to parse JSON: ");
+                    Serial.println(error.c_str());
+                    return;
+                }
+                
+                // Extract the epoch number from the first element in the array
+                epochNumber = doc[0]["epoch_no"];
             }
 
             void loop() {
@@ -31,6 +47,7 @@
                     Serial.println("Reconnected!"); // Print "Reconnected!" to the serial monitor
                 }
                 makeHttpRequest(); // Make the HTTP request
+                delay(60000); // Wait 60 seconds before making the next request
             }
 
             void makeHttpRequest() {
