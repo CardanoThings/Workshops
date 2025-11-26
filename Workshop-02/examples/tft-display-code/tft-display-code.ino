@@ -213,12 +213,12 @@
 				unsigned long secondsAgo = (millis() - lastFetchTime) / 1000;
 				
 				// Clear the timestamp area (blue rectangle over the old text)
-				tft.fillRect(0, 225, 200, 10, TFT_BLUE);
+				tft.fillRect(10, 220, 200, 10, TFT_BLUE);
 				
 				// Display last update timestamp in lower left corner
 				tft.setTextSize(1);
 				tft.setTextColor(TFT_WHITE, TFT_BLUE);
-				tft.setCursor(5, 225);
+				tft.setCursor(10, 220);
 				tft.print("Updated ");
 				tft.print(secondsAgo);
 				tft.println("s ago");
