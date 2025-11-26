@@ -81,18 +81,25 @@
 						DynamicJsonDocument doc(1024);
 						DeserializationError error = deserializeJson(doc, response);
 						
-						// Check if JSON parsing was successful
-						if (!error) {
-							// Blockfrost returns controlled_amount which is the total balance
-							// This includes both the delegated amount and rewards
-							float balance = doc["controlled_amount"] | 0.0;
-							
-							// Convert from Lovelace to ADA (1 ADA = 1,000,000 Lovelace)
-							balance = balance / 1000000;
-							
-							// Print current balance
-							Serial.println("Stake Address Balance: " + String(balance) + " ADA");
+					// Check if JSON parsing was successful
+					if (!error) {
+						// Extract controlled_amount as string (Blockfrost returns balance as string)
+						// controlled_amount is the total balance including delegated amount and rewards
+						const char* balanceStr = doc["controlled_amount"];
+						
+						// Convert string to long long (for large Lovelace values)
+						long long balanceLovelace = 0;
+						if (balanceStr != nullptr) {
+							balanceLovelace = atoll(balanceStr);
 						}
+						
+						// Convert from Lovelace to tADA (test ADA) - 1 tADA = 1,000,000 Lovelace
+						float balance = balanceLovelace / 1000000.0;
+						
+						// Print account information
+						Serial.println("Stake Address: " + String(doc["stake_address"].as<const char*>()));
+						Serial.println("Total Balance: " + String(balance, 6) + " tADA");
+					}
 					}
 					
 					// Close HTTP connection

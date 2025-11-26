@@ -115,18 +115,13 @@
 									balanceLovelace = atoll(balanceStr);
 								}
 								
-								// Convert from Lovelace (smallest unit) to ADA
-								// 1 ADA = 1,000,000 Lovelace
-								float balance = balanceLovelace / 1000000.0;
-								
-								// Print detailed account information
-								Serial.println("\\n--- Account Information ---");
-								Serial.println("Stake Address: " + String(accountInfo["stake_address"].as<const char*>()));
-								Serial.println("Status: " + String(accountInfo["status"].as<const char*>()));
-								Serial.println("Total Balance: " + String(balance, 6) + " ADA");
-								Serial.println("UTXO: " + String(accountInfo["utxo"].as<const char*>()));
-								Serial.println("Rewards Available: " + String(accountInfo["rewards_available"].as<const char*>()));
-								Serial.println("---------------------------\\n");
+							// Convert from Lovelace (smallest unit) to tADA (test ADA)
+							// 1 tADA = 1,000,000 Lovelace
+							float balance = balanceLovelace / 1000000.0;
+							
+							// Print account information
+							Serial.println("Stake Address: " + String(accountInfo["stake_address"].as<const char*>()));
+							Serial.println("Total Balance: " + String(balance, 6) + " tADA");
 								
 								// Check if balance has changed since last check
 								if (balance != previousBalance) {
