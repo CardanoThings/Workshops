@@ -8,14 +8,14 @@
 			const char* password = "Your Password";
 			
 			// Blockfrost API endpoint (Preprod Testnet)
-			// Note: Blockfrost uses GET requests with address in URL path
-			const char* apiUrl = "https://cardano-preprod.blockfrost.io/api/v0/addresses/";
+			// Note: Blockfrost uses GET requests with stake address in URL path
+			const char* apiUrl = "https://cardano-preprod.blockfrost.io/api/v0/accounts/";
 			
 			// Your Blockfrost API key (get free key from blockfrost.io)
 			const char* apiKey = "your-blockfrost-api-key";
 			
-			// Your Cardano wallet address (Preprod Testnet)
-			String walletAddress = "addr_test1...";
+			// Your Cardano stake address (Preprod Testnet)
+			String stakeAddress = "stake_test1...";
 			
 			// Variables for timing balance checks
 			unsigned long lastCheck = 0;                    // Timestamp of last balance check
@@ -50,18 +50,18 @@
 				
 				// Check if enough time has passed since last check
 				if (currentMillis - lastCheck >= checkInterval) {
-					fetchWalletBalance();
+					fetchStakeBalance();
 					lastCheck = currentMillis;  // Update last check timestamp
 				}
 			}
 
-			void fetchWalletBalance() {
+			void fetchStakeBalance() {
 				// Only proceed if WiFi is connected
 				if (WiFi.status() == WL_CONNECTED) {
 					HTTPClient http;
 					
-					// Build full URL by appending wallet address to base URL
-					String fullUrl = apiUrl + walletAddress;
+					// Build full URL by appending stake address to base URL
+					String fullUrl = apiUrl + stakeAddress;
 					
 					// Initialize HTTP client with full URL
 					http.begin(fullUrl);
@@ -83,15 +83,15 @@
 						
 						// Check if JSON parsing was successful
 						if (!error) {
-							// Blockfrost returns balance in amount array
-							// Get first amount object and extract quantity
-							float balance = doc["amount"][0]["quantity"] | 0.0;
+							// Blockfrost returns controlled_amount which is the total balance
+							// This includes both the delegated amount and rewards
+							float balance = doc["controlled_amount"] | 0.0;
 							
 							// Convert from Lovelace to ADA (1 ADA = 1,000,000 Lovelace)
 							balance = balance / 1000000;
 							
 							// Print current balance
-							Serial.println("Wallet Balance: " + String(balance) + " ADA");
+							Serial.println("Stake Address Balance: " + String(balance) + " ADA");
 						}
 					}
 					

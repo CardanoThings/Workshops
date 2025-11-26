@@ -7,11 +7,11 @@
 			const char* ssid = "Your SSID";
 			const char* password = "Your Password";
 			
-			// Koios API endpoint for fetching address information
-			const char* apiUrl = "https://preprod.koios.rest/api/v1/address_info";
+			// Koios API endpoint for fetching account information
+			const char* apiUrl = "https://preprod.koios.rest/api/v1/account_info";
 			
-			// Your Cardano wallet address (Preprod Testnet)
-			String walletAddress = "addr_test1...";
+			// Your Cardano stake address (Preprod Testnet)
+			String stakeAddress = "stake_test1...";
 			
 			// Variables for timing balance checks
 			unsigned long lastCheck = 0;                    // Timestamp of last balance check
@@ -39,7 +39,7 @@
 				Serial.println(WiFi.localIP());
 				
 				// Perform initial balance check on startup
-				fetchWalletBalance();
+				fetchStakeBalance();
 			}
 
 			void loop() {
@@ -61,12 +61,12 @@
 				
 				// Check if enough time has passed since last check
 				if (currentMillis - lastCheck >= checkInterval) {
-					fetchWalletBalance();
+					fetchStakeBalance();
 					lastCheck = currentMillis;  // Update last check timestamp
 				}
 			}
 
-			void fetchWalletBalance() {
+			void fetchStakeBalance() {
 				// Only proceed if WiFi is connected
 				if (WiFi.status() == WL_CONNECTED) {
 					HTTPClient http;
@@ -77,9 +77,13 @@
 					// Set content type header for JSON request
 					http.addHeader("Content-Type", "application/json");
 					
-					// Create JSON payload with wallet address
-					// Koios API expects addresses in an array under "_addresses" key
-					String jsonPayload = "{\"_addresses\":[\"" + walletAddress + "\"]}";
+				// Create JSON payload with stake address
+				// Koios API expects stake addresses in an array under "_stake_addresses" key
+				String jsonPayload = "{\\"";
+				jsonPayload += "_stake_addresses";
+				jsonPayload += "\\":[\\"";
+				jsonPayload += stakeAddress;
+				jsonPayload += "\\"]}";
 					
 					// Send POST request and get response code
 					int httpResponseCode = http.POST(jsonPayload);
@@ -98,25 +102,38 @@
 						if (!error) {
 							// Verify response is an array with at least one element
 							if (doc.is<JsonArray>() && doc.size() > 0) {
-								// Get first address info object from array
-								JsonObject addressInfo = doc[0];
+								// Get first account info object from array
+								JsonObject accountInfo = doc[0];
 								
-								// Extract balance (default to 0.0 if not found)
-								float balance = addressInfo["balance"] | 0.0;
+								// Extract total balance as string (Koios returns balance as string)
+								// total_balance includes delegated amount + rewards
+								const char* balanceStr = accountInfo["total_balance"];
+								
+								// Convert string to long long (for large Lovelace values)
+								long long balanceLovelace = 0;
+								if (balanceStr != nullptr) {
+									balanceLovelace = atoll(balanceStr);
+								}
 								
 								// Convert from Lovelace (smallest unit) to ADA
 								// 1 ADA = 1,000,000 Lovelace
-								balance = balance / 1000000;
+								float balance = balanceLovelace / 1000000.0;
 								
-								// Print current balance
-								Serial.println("Wallet Balance: " + String(balance) + " ADA");
+								// Print detailed account information
+								Serial.println("\\n--- Account Information ---");
+								Serial.println("Stake Address: " + String(accountInfo["stake_address"].as<const char*>()));
+								Serial.println("Status: " + String(accountInfo["status"].as<const char*>()));
+								Serial.println("Total Balance: " + String(balance, 6) + " ADA");
+								Serial.println("UTXO: " + String(accountInfo["utxo"].as<const char*>()));
+								Serial.println("Rewards Available: " + String(accountInfo["rewards_available"].as<const char*>()));
+								Serial.println("---------------------------\\n");
 								
 								// Check if balance has changed since last check
 								if (balance != previousBalance) {
 									if (balance > previousBalance) {
-										Serial.println("Balance increased!");
+										Serial.println("✓ Balance increased!");
 									} else {
-										Serial.println("Balance decreased!");
+										Serial.println("✓ Balance decreased!");
 									}
 									// Update previous balance for next comparison
 									previousBalance = balance;
