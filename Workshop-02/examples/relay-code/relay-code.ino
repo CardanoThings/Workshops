@@ -14,7 +14,7 @@
 			String walletAddress = "addr_test1...";
 			
 			// GPIO pin connected to relay module control input
-			const int relayPin = 2;
+			const int relayPin = 4;
 			
 			// Variables for timing balance checks
 			unsigned long lastCheck = 0;                    // Timestamp of last balance check
