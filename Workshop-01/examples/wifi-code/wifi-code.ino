@@ -5,6 +5,8 @@
 			// Setup function is called once when the microcontroller starts up.
 			void setup() {
 				Serial.begin(115200); // Initialize the serial communication at 115200 baud rate
+				WiFi.mode(WIFI_STA); // Set WiFi mode to Station (client mode)
+				WiFi.setTxPower(WIFI_POWER_8_5dBm); // Workaround for ESP32-C3 Super Mini
 				WiFi.begin(ssid, password); // Connect to WiFi using the SSID and Password
 				// Wait for the connection to be established
 				while (WiFi.status() != WL_CONNECTED) {

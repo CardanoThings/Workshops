@@ -1,6 +1,6 @@
-# Epoch Clock Code
+# Led Blink Code
 
-Display Cardano epoch progress on circular WS2812 LED ring with blue progress indicator
+Simple WS2812 LED ring blink example - test wiring with one LED at a time
 
 ## Requirements
 
