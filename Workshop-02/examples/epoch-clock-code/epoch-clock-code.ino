@@ -28,14 +28,12 @@
 			unsigned long lastCheck = 0;
 			const unsigned long checkInterval = 60000;  // Check every minute
 			
-			// Variables for walking LED (5 seconds per LED, 12 LEDs = 1 minute)
+			// Variables for walking LED - creates a clock-like second hand effect
+			// The white LED moves around the ring every 5 seconds
+			// 12 LEDs × 5 seconds = 60 seconds (1 minute) for a full rotation
 			unsigned long lastWalkUpdate = 0;
-			const unsigned long walkFadeInterval = 50;  // Update every 50ms for smooth fade
-			const unsigned long walkDuration = 5000;  // 5 seconds per LED
+			const unsigned long walkInterval = 5000;  // Move to next LED every 5 seconds
 			int walkPosition = 0;  // Current position of walking LED (0-11)
-			int walkBrightness = 0;  // Current brightness (0-255)
-			int walkFadeDirection = 1;  // 1 = fading in, -1 = fading out
-			unsigned long walkStartTime = 0;  // When current LED started
 			
 			// Store current epoch data
 			int currentEpoch = 0;
@@ -62,9 +60,6 @@
 				// Initial fetch
 				fetchEpochData();
 				displayProgress();
-				
-				// Initialize walking LED timing
-				walkStartTime = millis();
 			}
 
 			void loop() {
@@ -84,8 +79,8 @@
 					lastCheck = currentMillis;
 				}
 				
-				// Update walking LED fade effect
-				if (currentMillis - lastWalkUpdate >= walkFadeInterval) {
+				// Update walking LED every 5 seconds (creates second-hand effect)
+				if (currentMillis - lastWalkUpdate >= walkInterval) {
 					updateWalkingLED();
 					lastWalkUpdate = currentMillis;
 				}
@@ -146,32 +141,14 @@
 			}
 
 			void updateWalkingLED() {
-				unsigned long currentMillis = millis();
-				
-				// Check if we need to move to next LED (after 5 seconds)
-				if (currentMillis - walkStartTime >= walkDuration) {
-					walkPosition = (walkPosition + 1) % NUM_LEDS;
-					walkStartTime = currentMillis;
-					walkBrightness = 0;
-					walkFadeDirection = 1;  // Start fading in
-				}
-				
-				// Calculate elapsed time for current LED (0 to 5000ms)
-				unsigned long elapsed = currentMillis - walkStartTime;
-				
-				// Fade in for first 2.5 seconds, fade out for next 2.5 seconds
-				if (elapsed < 2500) {
-					// Fade in: 0 to 255 over 2.5 seconds
-					walkBrightness = (elapsed * 255) / 2500;
-				} else {
-					// Fade out: 255 to 0 over 2.5 seconds
-					walkBrightness = 255 - ((elapsed - 2500) * 255) / 2500;
-				}
-				
-				// Display epoch progress first (blue LEDs)
+				// Display epoch progress first (blue LEDs showing epoch completion)
 				displayProgress();
 				
-				// Add white walking LED with current brightness
-				strip.setPixelColor(walkPosition, strip.Color(walkBrightness, walkBrightness, walkBrightness));
+				// Add white walking LED at current position (creates clock second-hand effect)
+				// This LED blinks white for 5 seconds at each position before moving
+				strip.setPixelColor(walkPosition, strip.Color(255, 255, 255));  // White
 				strip.show();
+				
+				// Move to next position (wrap around after LED 11 to complete 60-second cycle)
+				walkPosition = (walkPosition + 1) % NUM_LEDS;
 			}

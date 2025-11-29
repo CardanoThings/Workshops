@@ -1,6 +1,6 @@
 # Epoch Clock Code
 
-Display Cardano epoch progress on circular WS2812 LED ring with blue progress indicator
+Display Cardano epoch progress on circular WS2812 LED ring with blue progress indicator and white walking LED (clock second-hand effect)
 
 ## Requirements
 
