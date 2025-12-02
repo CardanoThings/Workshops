@@ -11,7 +11,7 @@ constexpr int kHeaderHeight = 34; // Must match screen_helper
 } // namespace
 
 void drawStatusScreen() {
-  renderHeader("System", 2, 3);
+  renderHeader("System", 3);
   clearContentArea();
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);

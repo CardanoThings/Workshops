@@ -4,6 +4,9 @@
 
 extern TFT_eSPI tft;
 
+// Global constant for total number of screens
+const uint8_t TOTAL_SCREENS = 4;
+
 namespace {
 constexpr int kHeaderHeight = 34;
 constexpr int kTickerHeight = 30; // Must match ticker scroll height
@@ -26,8 +29,7 @@ void ensureHeaderSprite() {
 }
 } // namespace
 
-void renderHeader(const char *title, uint8_t activeIndex,
-                  uint8_t totalScreens) {
+void renderHeader(const char *title, uint8_t activeIndex) {
   ensureHeaderSprite();
 
   headerSprite.fillSprite(TFT_BLACK);
@@ -39,17 +41,17 @@ void renderHeader(const char *title, uint8_t activeIndex,
   }
   headerSprite.drawFastHLine(5, 20, headerSprite.width() - 10, TFT_WHITE);
 
-  if (totalScreens > 0) {
+  if (TOTAL_SCREENS > 0) {
     const int totalWidth =
-        totalScreens * (kIndicatorRadius * 2) +
-        (static_cast<int>(totalScreens) - 1) * kIndicatorSpacing;
+        TOTAL_SCREENS * (kIndicatorRadius * 2) +
+        (static_cast<int>(TOTAL_SCREENS) - 1) * kIndicatorSpacing;
     int startX = headerSprite.width() - kIndicatorMargin - totalWidth;
     if (startX < kIndicatorMargin) {
       startX = kIndicatorMargin;
     }
     const int centerY = 10;
 
-    for (uint8_t i = 0; i < totalScreens; ++i) {
+    for (uint8_t i = 0; i < TOTAL_SCREENS; ++i) {
       const int cx = startX + kIndicatorRadius +
                      i * ((kIndicatorRadius * 2) + kIndicatorSpacing);
       if (i == activeIndex) {

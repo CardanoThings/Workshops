@@ -11,7 +11,7 @@ constexpr int kHeaderHeight = 34; // Must match screen_helper
 } // namespace
 
 void drawWalletScreen() {
-  renderHeader("Wallet", 0, 3);
+  renderHeader("Wallet", 0);
   clearContentArea();
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);

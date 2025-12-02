@@ -1,4 +1,4 @@
-#include "asset_screen.h"
+#include "token_screen.h"
 #include "data_fetcher.h"
 #include "screen_helper.h"
 #include <TFT_eSPI.h>
@@ -10,8 +10,8 @@ constexpr int kHeaderHeight = 34; // Must match screen_helper
 constexpr int kTickerHeight = 30; // Must match ticker scroll height
 } // namespace
 
-void drawAssetScreen() {
-  renderHeader("Assets", 1, 3);
+void drawTokenScreen() {
+  renderHeader("Token Positions", 1);
   clearContentArea();
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -19,7 +19,7 @@ void drawAssetScreen() {
   int y = kHeaderHeight + 5;
   tft.setTextSize(2);
   tft.setCursor(10, y);
-  tft.print("Tokens (" + String(getTokenCount()) + ")");
+  tft.print("Tokens(" + String(getTokenCount()) + ")");
   y += 35;
 
   const int tokenCount = getTokenCount();
@@ -60,13 +60,13 @@ void drawAssetScreen() {
     tft.setCursor(160, y);
     tft.print("$" + String(token.value, 2));
 
-    tft.setCursor(220, y);
+    tft.setCursor(240, y);
     if (token.change24h >= 0) {
       tft.setTextColor(TFT_GREEN, TFT_BLACK);
     } else {
       tft.setTextColor(TFT_RED, TFT_BLACK);
     }
-    tft.print(String(token.change24h, 2));
+    tft.print((token.change24h >= 0 ? "+" : "-") + String(token.change24h, 2));
     tft.print("%");
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
 

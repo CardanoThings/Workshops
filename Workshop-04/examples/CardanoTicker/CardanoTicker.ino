@@ -4,6 +4,7 @@
 #include "config.h"
 #include "data_fetcher.h"
 #include "datascreens.h"
+#include "screen_helper.h"
 #include "secrets.h"
 #include "startscreen.h"
 #include "ticker.h"
@@ -13,7 +14,6 @@
 TFT_eSPI tft = TFT_eSPI();
 
 namespace {
-const uint8_t TOTAL_SCREENS = 3;
 const unsigned long SCREEN_DURATION_MS = 10000UL;
 uint8_t currentScreenIndex = 0;
 unsigned long lastScreenChange = 0;
@@ -25,7 +25,10 @@ void showCurrentScreen() {
     drawWalletScreen();
     break;
   case 1:
-    drawAssetScreen();
+    drawTokenScreen();
+    break;
+  case 2:
+    drawNFTScreen();
     break;
   default:
     drawStatusScreen();

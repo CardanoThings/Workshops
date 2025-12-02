@@ -13,6 +13,7 @@ constexpr unsigned long KOIOS_INTERVAL_MS = 60UL * 1000UL;
 constexpr unsigned long PORTFOLIO_INTERVAL_MS = 10UL * 60UL * 1000UL;
 constexpr size_t MAX_POLICY_IDS = 10;
 constexpr size_t MAX_TOKENS = 20;
+constexpr size_t MAX_NFTS = 20;
 
 float walletBalance = 0.0f;
 int tokenCount = 0;
@@ -20,6 +21,7 @@ int nftCount = 0;
 String policyIds[MAX_POLICY_IDS];
 int policyIdCount = 0;
 TokenInfo tokens[MAX_TOKENS];
+NFTInfo nfts[MAX_NFTS];
 
 unsigned long lastKoiosFetch = 0;
 unsigned long lastPortfolioFetch = 0;
@@ -42,6 +44,12 @@ void initDataFetcher() {
     tokens[i].amount = 0.0f;
     tokens[i].value = 0.0f;
     tokens[i].change24h = 0.0f;
+  }
+  for (size_t i = 0; i < MAX_NFTS; ++i) {
+    nfts[i].name = "";
+    nfts[i].amount = 0.0f;
+    nfts[i].floorPrice = 0.0f;
+    nfts[i].policyId = "";
   }
 }
 
@@ -97,6 +105,14 @@ TokenInfo getToken(int index) {
     return empty;
   }
   return tokens[index];
+}
+
+NFTInfo getNFT(int index) {
+  NFTInfo empty = {"", 0.0f, 0.0f, ""};
+  if (index < 0 || index >= nftCount || index >= static_cast<int>(MAX_NFTS)) {
+    return empty;
+  }
+  return nfts[index];
 }
 
 namespace {
@@ -194,23 +210,53 @@ void fetchMinSwapData() {
         if (positions.containsKey("nft_positions")) {
           JsonArray nftArray = positions["nft_positions"];
           nftCount = nftArray.size();
+          if (nftCount > static_cast<int>(MAX_NFTS)) {
+            nftCount = MAX_NFTS;
+          }
           Serial.print("NFTs found: ");
           Serial.println(nftCount);
 
           policyIdCount = 0;
           for (int i = 0;
-               i < nftArray.size() && i < static_cast<int>(MAX_POLICY_IDS);
+               i < nftArray.size() && i < static_cast<int>(MAX_NFTS) &&
+               i < static_cast<int>(MAX_POLICY_IDS);
                ++i) {
             JsonObject nft = nftArray[i];
             const char *currencySymbol = nft["currency_symbol"];
+
+            // Extract NFT name and amount from MinSwap
+            String nftName = "Unknown NFT";
+            float nftAmount = 0.0f;
+
+            if (nft.containsKey("asset")) {
+              JsonObject assetInfo = nft["asset"];
+              if (assetInfo.containsKey("metadata")) {
+                JsonObject metadata = assetInfo["metadata"];
+                nftName = metadata["name"] | "Unknown NFT";
+              }
+            }
+            nftAmount = nft["amount"] | 0.0f;
+
+            // Store NFT data
+            nfts[i].name = nftName;
+            nfts[i].amount = nftAmount;
+            nfts[i].floorPrice = 0.0f; // Will be updated by Cexplorer
+            nfts[i].policyId =
+                currencySymbol != nullptr ? String(currencySymbol) : "";
+
             if (currencySymbol != nullptr) {
               policyIds[policyIdCount] = String(currencySymbol);
               ++policyIdCount;
 
               Serial.print("  NFT ");
               Serial.print(i + 1);
-              Serial.print(": Policy ID (currency_symbol): ");
-              Serial.println(currencySymbol);
+              Serial.print(": ");
+              Serial.print(nftName);
+              Serial.print(" (Policy ID: ");
+              Serial.print(currencySymbol);
+              Serial.print(", Amount: ");
+              Serial.print(nftAmount);
+              Serial.println(")");
             }
           }
 
@@ -320,10 +366,11 @@ void fetchCexplorerData(const String &policyId) {
           Serial.print("Collection Name: ");
           Serial.println(collectionName);
 
+          float floorPriceAda = 0.0f;
           if (collection.containsKey("stats")) {
             JsonObject stats = collection["stats"];
             long floorLovelace = stats["floor"] | 0;
-            float floorPriceAda = floorLovelace / 1000000.0f;
+            floorPriceAda = floorLovelace / 1000000.0f;
             int owners = stats["owners"] | 0;
 
             Serial.print("Floor Price: ");
@@ -331,6 +378,19 @@ void fetchCexplorerData(const String &policyId) {
             Serial.println(" ADA");
             Serial.print("Owners: ");
             Serial.println(owners);
+          }
+
+          // Update collection name and floor price for NFTs with matching
+          // policy ID
+          for (int i = 0; i < nftCount && i < static_cast<int>(MAX_NFTS); ++i) {
+            if (nfts[i].policyId == policyId) {
+              nfts[i].name =
+                  collectionName; // Update with collection name from Cexplorer
+              if (floorPriceAda > 0.0f) {
+                nfts[i].floorPrice = floorPriceAda;
+              }
+              break;
+            }
           }
         }
       } else {

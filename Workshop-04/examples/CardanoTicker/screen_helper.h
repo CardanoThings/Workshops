@@ -3,7 +3,9 @@
 
 #include <Arduino.h>
 
-void renderHeader(const char *title, uint8_t activeIndex, uint8_t totalScreens);
+extern const uint8_t TOTAL_SCREENS;
+
+void renderHeader(const char *title, uint8_t activeIndex);
 void clearContentArea(); // Clears the area between header and ticker
 
 #endif
