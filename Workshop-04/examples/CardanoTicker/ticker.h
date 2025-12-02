@@ -1,19 +1,29 @@
+/**
+ * ticker.h - Header file for scrolling ticker
+ * 
+ * This file declares the functions for the scrolling token price ticker
+ * that appears at the bottom of the screen.
+ */
+
 #ifndef TICKER_H
 #define TICKER_H
 
 #include <Arduino.h>
 
-// Data structures for tokens and NFTs
-struct TokenData {
-  String ticker;
-  float price;
-  float change24h;
-};
-
-// Initialize the ticker display
+/**
+ * Initialize the ticker display
+ * 
+ * Sets up the sprite buffer and calculates content width.
+ * Call this once in setup().
+ */
 void initTicker();
 
-// Update the ticker display (call this in loop)
+/**
+ * Update the ticker display
+ * 
+ * Draws the scrolling ticker and updates the scroll position.
+ * Call this repeatedly in loop() to create smooth scrolling animation.
+ */
 void updateTicker();
 
 #endif
