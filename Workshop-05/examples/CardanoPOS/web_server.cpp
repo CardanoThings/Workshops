@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include <stdlib.h> // For random number generation
 
 namespace {
 WebServer server(80);
@@ -143,6 +144,19 @@ void handleCreateTransaction() {
 
   unsigned long lovelace = requestDoc["amount"].as<unsigned long>();
 
+  // Get created_at from POST data (ISO string format)
+  // Client sends created_at as ISO string (new Date().toISOString())
+  String createdAt;
+  if (requestDoc.containsKey("created_at") &&
+      requestDoc["created_at"].is<const char *>()) {
+    createdAt = requestDoc["created_at"].as<const char *>();
+  }
+  // If not provided, createdAt remains empty (will be stored as null)
+
+  // Generate a random ID for the transaction
+  // Use random number for uniqueness
+  String transactionId = String(millis()) + "-" + String(random(10000, 99999));
+
   // Read existing transactions or create new array
   StaticJsonDocument<8192> doc;
   JsonArray transactions = doc.to<JsonArray>();
@@ -166,11 +180,14 @@ void handleCreateTransaction() {
 
   // Create new transaction object
   JsonObject newTransaction = transactions.createNestedObject();
+  newTransaction["id"] = transactionId;
   newTransaction["amount"] = lovelace;
   newTransaction["address"] = CARDANO_ADDRESS;
-  unsigned long timestamp =
-      millis() / 1000; // Unix timestamp (seconds since boot)
-  newTransaction["timestamp"] = timestamp;
+  if (createdAt.length() > 0) {
+    newTransaction["created_at"] = createdAt; // ISO string format
+  } else {
+    newTransaction["created_at"] = nullptr; // null if not provided
+  }
   newTransaction["txHash"] = "";
 
   // Write back to file
@@ -184,12 +201,14 @@ void handleCreateTransaction() {
   file.close();
 
   // Display transaction on TFT screen
-  displayTransaction(lovelace, CARDANO_ADDRESS, timestamp);
+  // Use current time for display (timestamp parameter is not used in display)
+  unsigned long displayTimestamp = millis() / 1000;
+  displayTransaction(lovelace, CARDANO_ADDRESS, displayTimestamp);
 
   // Return success response
-  StaticJsonDocument<128> responseDoc;
+  StaticJsonDocument<256> responseDoc;
   responseDoc["success"] = true;
-  responseDoc["id"] = transactions.size() - 1;
+  responseDoc["id"] = transactionId;
 
   String response;
   serializeJson(responseDoc, response);

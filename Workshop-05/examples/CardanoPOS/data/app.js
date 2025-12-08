@@ -33,6 +33,7 @@ document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             },
             body: JSON.stringify({
                 amount: lovelace,
+                created_at: new Date().toISOString()
             }),
         });
 
