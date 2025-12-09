@@ -283,14 +283,6 @@ If you see errors about rate limiting:
 - **Rate Limit**: May require API key for higher limits
 - **Documentation**: https://cexplorer.io/api
 
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines if applicable]
-
 ## Support
 
 For issues or questions, please check:
