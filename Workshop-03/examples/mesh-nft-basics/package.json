@@ -1,0 +1,15 @@
+{
+	"name": "mesh-nft-basics",
+	"version": "1.0.0",
+	"description": "Basic NFT minting and burning examples using Mesh SDK",
+	"type": "module",
+	"main": "mint-nft.js",
+	"scripts": {
+		"mint": "node mint-nft.js",
+		"burn": "node burn-nft.js"
+	},
+	"dependencies": {
+		"@meshsdk/core": "^1.7.0"
+	}
+}
+
