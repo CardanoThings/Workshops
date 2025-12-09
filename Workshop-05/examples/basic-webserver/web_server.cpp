@@ -4,8 +4,8 @@
 #include <WiFi.h>
 
 namespace {
-WebServer server(80);
-bool serverStarted = false;
+WebServer server(80);       // Web server on port 80
+bool serverStarted = false; // Flag to check if server is started
 
 // Get MIME type for HTML files
 String getContentType(String filename) { return "text/html"; }
@@ -92,6 +92,7 @@ void webServerSetup() {
   Serial.println(WiFi.localIP());
 }
 
+// Handle incoming client requests
 void webServerLoop() {
   // Handle incoming client requests
   if (serverStarted) {
@@ -99,4 +100,5 @@ void webServerLoop() {
   }
 }
 
+// Check if server is running
 bool webServerIsRunning() { return serverStarted; }
