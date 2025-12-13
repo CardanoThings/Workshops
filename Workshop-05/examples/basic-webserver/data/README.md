@@ -62,3 +62,7 @@ All files maintain their directory structure when uploaded to LittleFS.
 - If a requested file doesn't exist, the server will try to serve `index.html` as a fallback
 - File size is limited by available flash memory on your ESP32
 
+
+
+
+

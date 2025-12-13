@@ -64,3 +64,7 @@ If WiFi is not connected:
 - IP address shows "0.0.0.0"
 - MAC address is always available (hardware identifier)
 
+
+
+
+

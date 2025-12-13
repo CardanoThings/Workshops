@@ -88,17 +88,18 @@ void webServerSetup() {
   server.begin();
   serverStarted = true;
 
+  // Print the server's IP address
   Serial.print("Web server started on http://");
   Serial.println(WiFi.localIP());
 }
 
-// Handle incoming client requests
+// Function to handle incoming client requests
 void webServerLoop() {
-  // Handle incoming client requests
+  // If the server is started, handle incoming client requests
   if (serverStarted) {
     server.handleClient();
   }
 }
 
-// Check if server is running
+// Function to check if the server is running
 bool webServerIsRunning() { return serverStarted; }

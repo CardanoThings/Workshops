@@ -47,3 +47,7 @@ The 24h change uses color coding for quick visual feedback:
 
 This makes it easy to see at a glance which tokens are performing well!
 
+
+
+
+

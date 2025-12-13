@@ -91,3 +91,7 @@ The WiFi manager handles various error scenarios:
 
 All errors are handled gracefully without crashing your program.
 
+
+
+
+

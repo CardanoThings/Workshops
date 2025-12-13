@@ -48,3 +48,7 @@ NFTs are grouped by Policy ID (collection identifier). This means:
 
 The floor price comes from the Cexplorer API and represents the lowest current selling price for NFTs in that collection. If the floor price data hasn't been fetched yet (or isn't available), the screen displays "N/A" instead.
 
+
+
+
+
