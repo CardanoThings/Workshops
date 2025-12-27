@@ -1,10 +1,15 @@
 // Include necessary libraries
 #include <Arduino.h>
+#include <TFT_eSPI.h>
 
 // Include our custom header files
-#include "secrets.h"      // WiFi credentials (not in git)
-#include "web_server.h"   // HTTP web server for serving files
-#include "wifi_manager.h" // WiFi connection management
+#include "secrets.h"        // WiFi credentials (not in git)
+#include "transaction_qr.h" // Transaction QR code display
+#include "web_server.h"     // HTTP web server for serving files
+#include "wifi_manager.h"   // WiFi connection management
+
+// Display object - handles communication with the TFT screen
+TFT_eSPI display = TFT_eSPI();
 
 void setup() {
   // Initialize serial communication for debugging
@@ -13,9 +18,6 @@ void setup() {
   // You can view these messages in the Arduino IDE Serial Monitor
   Serial.begin(115200);
   delay(1000); // Give serial monitor time to connect
-
-  Serial.println("Basic Web Server Example");
-  Serial.println("========================");
 
   // Set up WiFi connection
   // WIFI_SSID is your WiFi network name
@@ -44,6 +46,40 @@ void setup() {
   } else {
     Serial.println("WiFi connection failed - web server not started");
   }
+
+  // Initialize the display
+  display.begin();
+
+  // Invert display colors (useful for certain display types)
+  display.invertDisplay(true);
+
+  // Set display rotation (0 = portrait, 1-3 = other orientations)
+  display.setRotation(0);
+
+  // Fill the entire screen with black background
+  display.fillScreen(TFT_BLACK);
+
+  // Welcome Message
+  display.setTextColor(TFT_WHITE);
+
+  // Center "Cardano POS" text using MC_DATUM (Middle Center datum)
+  display.setTextSize(2);
+  display.setTextDatum(MC_DATUM);
+  display.drawString("Cardano POS", display.width() / 2,
+                     display.height() / 2 - 10);
+
+  // Center "www.cardanothings.io" text below
+  display.setTextSize(1);
+  display.drawString("www.cardanothings.io", display.width() / 2,
+                     display.height() / 2 + 20);
+  delay(5000);
+  display.fillScreen(TFT_BLACK);
+
+  // Initialize transaction QR display
+  transactionQRInit(display);
+
+  // Register callback to display QR code when new transaction is created
+  setTransactionCreatedCallback(displayNewTransactionQR, &display);
 }
 
 void loop() {
@@ -58,7 +94,7 @@ void loop() {
     webServerSetup();
   }
   webServerLoop();
+
+  // Update transaction QR display and check on-chain status
+  transactionQRUpdate(display);
 }
-
-
-

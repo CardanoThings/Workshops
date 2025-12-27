@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Cardano POS</title>
+    <link rel="stylesheet"
+          href="styles.css">
+</head>
+
+<body>
+
+    <button id="openPaymentModal"
+            class="btn-primary">New Payment Request</button>
+
+    <!-- Transactions Section -->
+    <section id="transactionsSection"
+             class="transactions-section">
+        <h2>Transactions</h2>
+        <div id="transactionsContainer"></div>
+    </section>
+
+    <!-- Payment Modal -->
+    <dialog id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Payment Request</h2>
+                <form method="dialog">
+                    <button class="close">&times;</button>
+                </form>
+            </div>
+            <form id="paymentForm"
+                  class="modal-body">
+                <div class="form-group">
+                    <label for="adaAmount">ADA Amount:</label>
+                    <input type="number"
+                           id="adaAmount"
+                           name="adaAmount"
+                           step="0.1"
+                           min="0.1"
+                           placeholder="Enter amount in ADA"
+                           required>
+                </div>
+                <div class="form-actions">
+                    <button type="button"
+                            class="btn-secondary"
+                            id="cancelBtn">Cancel</button>
+                    <button type="submit"
+                            class="btn-primary">Create Payment Request</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <script src="requestPayment.js"></script>
+    <script src="transactionList.js"></script>
+</body>
+
+</html>
