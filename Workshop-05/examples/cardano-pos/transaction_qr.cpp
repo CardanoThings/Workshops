@@ -17,7 +17,6 @@ unsigned long waitingStartTime = 0;
 bool isWaitingForPayment = false;
 int waitingTransactionId = -1;
 uint64_t waitingLovelaceAmount = 0;
-bool waitingScreenDrawn = false;
 unsigned long successStartTime = 0;
 bool isShowingSuccess = false;
 const unsigned long SUCCESS_DISPLAY_TIME = 10000; // 10 seconds
@@ -36,7 +35,6 @@ void transactionQRInit(TFT_eSPI &display) {
   isWaitingForPayment = false;
   waitingTransactionId = -1;
   waitingLovelaceAmount = 0;
-  waitingScreenDrawn = false;
   successStartTime = 0;
   isShowingSuccess = false;
 }
@@ -112,44 +110,7 @@ String formatLovelaceToADA(uint64_t lovelaceAmount) {
   return result;
 }
 
-// Function 1: Display QR code for a transaction
-void displayTransactionQR(TFT_eSPI &display, int transactionId,
-                          uint64_t lovelaceAmount) {
-  // Calculate original amount (subtract ID) for display
-  uint64_t originalAmount = lovelaceAmount - transactionId;
-  float adaAmountForDisplay = (float)originalAmount / 1000000.0;
-
-  // For QR code, use full amount including ID (lovelaceAmount already has ID
-  // added)
-  // Format using integer arithmetic to avoid floating point precision issues
-  String adaAmountForQR = formatLovelaceToADA(lovelaceAmount);
-
-  // Build QR code URL: web+cardano:[paymentAddress]?amount=[ADAamount with ID]
-  String qrContent = "web+cardano:";
-  qrContent += PAYMENT_ADDRESS;
-  qrContent += "?amount=";
-  qrContent += adaAmountForQR;
-
-  // Generate and display QR code
-  qrSprite->fillSprite(TFT_WHITE);
-  qrcode->create(qrContent);
-  display.fillScreen(TFT_BLACK);
-
-  int spriteX = (display.width() - qrSprite->width()) / 2;
-  int spriteY = (display.height() - qrSprite->height()) / 2;
-  qrSprite->pushSprite(spriteX, spriteY);
-
-  // Display transaction info
-  display.setTextColor(TFT_WHITE);
-  display.setTextSize(1);
-  display.setTextDatum(TC_DATUM);
-  display.drawString("TX ID: " + String(transactionId), display.width() / 2,
-                     spriteY + qrSprite->height() + 5);
-  display.drawString(String(adaAmountForDisplay, 2) + " ADA",
-                     display.width() / 2, spriteY + qrSprite->height() + 20);
-}
-
-// Function 2: Check for transaction using Koios API
+// Check for transaction using Koios API
 // transactionId: ID of the transaction
 // lovelaceAmount: Amount in lovelace (with ID already added)
 // Returns transaction hash if payment received, empty string otherwise
@@ -231,7 +192,7 @@ String checkForTransaction(int transactionId, uint64_t lovelaceAmount) {
   return "";
 }
 
-// Function 3: Display success message and update transaction JSON with hash
+// Display success message and update transaction JSON with hash
 void displaySuccessAndUpdateHash(TFT_eSPI &display, int transactionId,
                                  const String &txHash) {
   // Update transaction with hash
@@ -284,20 +245,20 @@ void displayWaitingMessage(TFT_eSPI &display, int transactionId,
     qrSprite->fillSprite(TFT_WHITE);
     qrcode->create(qrContent);
 
-    // Position QR code below the text
+    // Center QR code horizontally and position vertically
     int spriteX = (display.width() - qrSprite->width()) / 2;
-    int spriteY = 30; // Below the "Waiting for Payment" text
+    // Center QR code vertically, accounting for text above and info below
+    int spriteY = (display.height() - qrSprite->height()) / 2;
     qrSprite->pushSprite(spriteX, spriteY);
 
-    // Display "Waiting for Payment" text above QR code (black text on white,
-    // smaller size)
+    // Display "PLEASE PAY NOW!" text 20px above QR code
     display.setTextColor(TFT_BLACK);
     display.setTextSize(2);
     display.setTextDatum(TC_DATUM);
-    display.drawString("PLEASE PAY NOW!", display.width() / 2, 20);
+    display.drawString("PLEASE PAY NOW!", display.width() / 2, spriteY - 20);
 
-    // Display transaction ID and ADA amount below QR code
-    int infoY = spriteY + qrSprite->height() + 5;
+    // Display transaction ID and ADA amount 20px below QR code
+    int infoY = spriteY + qrSprite->height();
     display.setTextSize(1);
     display.setTextColor(TFT_BLACK);
 
@@ -322,7 +283,6 @@ void displayNewTransactionQR(TFT_eSPI *display, int transactionId,
   isWaitingForPayment = true;
   waitingTransactionId = transactionId;
   waitingLovelaceAmount = lovelaceAmount;
-  waitingScreenDrawn = false;
   lastCheckTime = millis();
 
   uint64_t originalAmount = lovelaceAmount - transactionId;
@@ -346,7 +306,6 @@ void displayNewTransactionQR(TFT_eSPI *display, int transactionId,
 
   // Draw initial waiting screen
   displayWaitingMessage(*display, transactionId, lovelaceAmount, true);
-  waitingScreenDrawn = true;
 }
 
 void transactionQRUpdate(TFT_eSPI &display) {
@@ -365,11 +324,10 @@ void transactionQRUpdate(TFT_eSPI &display) {
 
   // If waiting for payment, check for payment
   if (isWaitingForPayment && waitingTransactionId != -1) {
-    unsigned long waitTimeSeconds = (currentTime - waitingStartTime) / 1000;
-
     // Check for payment every CHECK_INTERVAL
     if (currentTime - lastCheckTime >= CHECK_INTERVAL) {
       lastCheckTime = currentTime;
+      unsigned long waitTimeSeconds = (currentTime - waitingStartTime) / 1000;
       Serial.print("[Transaction Listener] Checking payment (waiting for ");
       Serial.print(waitTimeSeconds);
       Serial.println(" seconds)...");
@@ -390,6 +348,3 @@ void transactionQRUpdate(TFT_eSPI &display) {
     }
   }
 }
-
-// Legacy function - kept for compatibility but not used
-bool checkTransactionOnChain(int transactionId) { return false; }

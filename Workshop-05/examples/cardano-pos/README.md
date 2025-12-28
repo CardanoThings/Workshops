@@ -202,6 +202,7 @@ Set your Cardano payment address in `secrets.h`:
 
 - **WiFi Manager:** See `wifi_manager.md` for WiFi connection management
 - **Web Server:** See `web_server.md` for HTTP server and API documentation
+- **Transaction QR:** See `transaction_qr.md` for QR code display and transaction monitoring
 - **Data Files:** See `data/README.md` for web interface file structure
 
 ## Troubleshooting

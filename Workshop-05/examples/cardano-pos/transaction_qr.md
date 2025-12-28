@@ -35,26 +35,6 @@ void setup() {
 }
 ```
 
-### `displayTransactionQR(display, transactionId, lovelaceAmount)`
-
-Displays a QR code for a transaction on the TFT screen. This is a standalone function that can be called to display any transaction's QR code.
-
-**Parameters:**
-- `display`: Reference to the TFT_eSPI display object
-- `transactionId`: The transaction ID
-- `lovelaceAmount`: Amount in lovelace (with transaction ID already added)
-
-**What it does:**
-1. Formats the Cardano payment URL with amount including ID
-2. Generates QR code on sprite buffer
-3. Displays QR code centered on screen
-4. Shows transaction ID and ADA amount below QR code
-
-**Usage:**
-```cpp
-displayTransactionQR(display, 1, 5000001);
-```
-
 ### `displayNewTransactionQR(display, transactionId, lovelaceAmount)`
 
 Displays QR code for a newly created transaction and starts monitoring for payment. This is typically called via callback when a new transaction is created through the API.
