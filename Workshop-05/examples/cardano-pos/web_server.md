@@ -186,9 +186,10 @@ Transactions are stored in `/transactions.json` in LittleFS:
 Files in the `data/` directory are accessible at the root path:
 - `data/index.html` → `http://[IP]/index.html` or `http://[IP]/`
 - `data/styles.css` → `http://[IP]/styles.css`
-- `data/app.js` → `http://[IP]/app.js`
 - `data/requestPayment.js` → `http://[IP]/requestPayment.js`
 - `data/transactionList.js` → `http://[IP]/transactionList.js`
+- `data/transactions.json` → `http://[IP]/transactions.json`
+
 
 ## Key Features
 
