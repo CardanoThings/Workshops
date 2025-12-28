@@ -31,20 +31,26 @@ To upload files from this directory to your ESP32:
 ## Current Files
 
 ### `index.html`
+
 The main HTML page served at the root path. Contains:
+
 - Payment request creation button
 - Transaction list display area
 - Modal dialog for payment amount input
 
 ### `styles.css`
+
 Stylesheet for the web interface. Includes:
+
 - Button styling
 - Modal dialog styling (using native `<dialog>` element)
 - Transaction table styling
 - Responsive design
 
 ### `requestPayment.js`
+
 Handles payment request creation:
+
 - Opens modal dialog for ADA amount input
 - Converts ADA to lovelace (1 ADA = 1,000,000 lovelace)
 - Sends POST request to `/api/transactions`
@@ -52,7 +58,9 @@ Handles payment request creation:
 - Uses native `<dialog>` element for modal
 
 ### `transactionList.js`
+
 Manages transaction list display:
+
 - Fetches transactions from `/api/transactions` API
 - Displays transactions in a table format
 - Converts lovelace amounts to ADA for display
@@ -60,13 +68,12 @@ Manages transaction list display:
 - Auto-refreshes every 30 seconds
 - Exposes `window.refreshTransactions()` for manual refresh
 
-### `app.js`
-Additional JavaScript functionality (if needed).
-
 ### `transactions.json`
+
 Transaction storage file (created automatically by the API, not manually uploaded).
 
 ### `favicon.ico`
+
 Favicon for the web interface.
 
 ## API Integration
@@ -74,9 +81,11 @@ Favicon for the web interface.
 The frontend JavaScript files interact with the ESP32 web server API:
 
 ### GET `/api/transactions`
+
 Fetched by `transactionList.js` to retrieve all transactions.
 
 **Response:**
+
 ```json
 [
   {
@@ -89,9 +98,11 @@ Fetched by `transactionList.js` to retrieve all transactions.
 ```
 
 ### POST `/api/transactions`
+
 Called by `requestPayment.js` to create new payment requests.
 
 **Request:**
+
 ```json
 {
   "amount": 5000000,
@@ -100,6 +111,7 @@ Called by `requestPayment.js` to create new payment requests.
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -144,6 +156,7 @@ All files maintain their directory structure when uploaded to LittleFS.
 ## Frontend Features
 
 ### Payment Request Creation
+
 - Modal dialog using native `<dialog>` element
 - Input validation for ADA amounts
 - Automatic conversion to lovelace
@@ -151,6 +164,7 @@ All files maintain their directory structure when uploaded to LittleFS.
 - Automatic transaction list refresh after creation
 
 ### Transaction List
+
 - Real-time updates (polls every 30 seconds)
 - Manual refresh capability
 - Table display with formatted data
