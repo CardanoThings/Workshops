@@ -17,24 +17,37 @@ In this workshop you will build a simple payment system right on your microcontr
 
 This folder contains the following code examples:
 
-- `payment-ui-code` - Complete payment UI with number pad
-- `simple-ui-code` - Basic UI example
-- `cip-13-uri-code` - CIP-13 payment URI creation
-- `qr-code-code` - QR code generation and display
-- `simple-qr-code` - Basic QR code example
-- `payment-monitor-code` - Transaction monitoring and confirmation
-- `simple-monitor-code` - Basic transaction monitoring
+- **`basic-webserver`** - A basic HTTP web server that serves static HTML files from LittleFS. Demonstrates WiFi connection management, LittleFS file system usage, and serving web content from the ESP32. Perfect starting point for understanding web server basics.
+
+- **`qr-code-basics`** - Simple QR code generation and display example for TFT displays using sprites. Shows how to generate QR codes, render them to off-screen buffers, and display them on the screen. Essential foundation for creating payment interfaces with scannable QR codes.
+
+- **`cardano-pos`** - Complete Cardano Point of Sale (POS) system with web interface, QR code payment display, and on-chain transaction monitoring. Features include:
+  - Web-based payment request creation
+  - QR code display on TFT screen with CIP-13 payment URIs
+  - Transaction history management
+  - Automatic transaction monitoring via Koios API
+  - Real-time payment confirmation
 
 ## Requirements
 
 **Hardware:**
-- D1 Mini Microcontroller (ESP8266 based) with TFT Display and Touchscreen
-- Micro USB Cable
+
+- ESP32 development board (or compatible ESP32-based board like ESP32-C3)
+- TFT display compatible with TFT_eSPI library (e.g., Cheap Yellow Display / CYD)
+- Micro USB Cable for programming and power
 - Computer with Arduino IDE installed
 - WiFi Network with Internet Access
 
 **Software:**
-- Yoroi Wallet (Preprod Testnet)
-- Arduino IDE
-- NodeJs and NPM
 
+- Arduino IDE with ESP32 board support installed
+- Required Arduino Libraries (install via Library Manager):
+  - `TFT_eSPI` - TFT display control
+  - `QRcodeDisplay` - QR code generation
+  - `QRcode_eSPI` - TFT_eSPI adapter for QR codes
+  - `ArduinoJson` - JSON parsing and serialization
+  - `LittleFS` - File system for ESP32 (built-in)
+  - `WebServer` - HTTP server (ESP32 built-in)
+  - `HTTPClient` - HTTP client for API calls (ESP32 built-in)
+- Cardano wallet (Yoroi, Vespr, or BeginWallet) for testing payments
+- Node.js and NPM (for advanced examples, if needed)
