@@ -75,8 +75,36 @@ function displayTransactions(transactions) {
     transactionsContainer.appendChild(table);
 }
 
+// Polling interval ID (stored so it can be cleared if needed)
+let pollingInterval = null;
+
+// Start polling for transactions every 30 seconds
+function startTransactionPolling() {
+    // Clear any existing interval
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+
+    // Set up interval to fetch transactions every 30 seconds
+    pollingInterval = setInterval(() => {
+        console.log('Polling for transactions...');
+        loadTransactions();
+    }, 30000); // 30 seconds = 30000 milliseconds
+}
+
+// Stop polling (optional, for cleanup if needed)
+function stopTransactionPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+}
+
 // Load transactions on page load
 loadTransactions();
+
+// Start automatic polling
+startTransactionPolling();
 
 // Refresh transactions after successful payment creation
 // This will be called from requestPayment.js after a successful transaction

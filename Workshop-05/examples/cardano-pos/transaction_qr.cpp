@@ -18,8 +18,9 @@ bool isWaitingForPayment = false;
 int waitingTransactionId = -1;
 uint64_t waitingLovelaceAmount = 0;
 bool waitingScreenDrawn = false;
-
-const char *KOIOS_API_URL = "https://preprod.koios.rest/api/v1/address_utxos";
+unsigned long successStartTime = 0;
+bool isShowingSuccess = false;
+const unsigned long SUCCESS_DISPLAY_TIME = 10000; // 10 seconds
 } // namespace
 
 void transactionQRInit(TFT_eSPI &display) {
@@ -36,6 +37,8 @@ void transactionQRInit(TFT_eSPI &display) {
   waitingTransactionId = -1;
   waitingLovelaceAmount = 0;
   waitingScreenDrawn = false;
+  successStartTime = 0;
+  isShowingSuccess = false;
 }
 
 // Helper: Update transaction hash in LittleFS
@@ -80,6 +83,35 @@ bool updateTransactionHash(int transactionId, const String &txHash) {
   return false;
 }
 
+// Helper function: Format lovelace amount to ADA string with precise formatting
+// Avoids floating point precision issues by using integer arithmetic
+String formatLovelaceToADA(uint64_t lovelaceAmount) {
+  uint64_t wholeADA = lovelaceAmount / 1000000;
+  uint64_t fractionalLovelace = lovelaceAmount % 1000000;
+
+  String result = String(wholeADA);
+  result += ".";
+
+  // Format fractional part with leading zeros (always 6 digits)
+  if (fractionalLovelace == 0) {
+    result += "000000";
+  } else {
+    // Add leading zeros if needed
+    uint64_t temp = fractionalLovelace;
+    int digits = 0;
+    while (temp > 0) {
+      temp /= 10;
+      digits++;
+    }
+    for (int i = 0; i < 6 - digits; i++) {
+      result += "0";
+    }
+    result += String(fractionalLovelace);
+  }
+
+  return result;
+}
+
 // Function 1: Display QR code for a transaction
 void displayTransactionQR(TFT_eSPI &display, int transactionId,
                           uint64_t lovelaceAmount) {
@@ -89,13 +121,14 @@ void displayTransactionQR(TFT_eSPI &display, int transactionId,
 
   // For QR code, use full amount including ID (lovelaceAmount already has ID
   // added)
-  float adaAmountForQR = (float)lovelaceAmount / 1000000.0;
+  // Format using integer arithmetic to avoid floating point precision issues
+  String adaAmountForQR = formatLovelaceToADA(lovelaceAmount);
 
   // Build QR code URL: web+cardano:[paymentAddress]?amount=[ADAamount with ID]
   String qrContent = "web+cardano:";
   qrContent += PAYMENT_ADDRESS;
   qrContent += "?amount=";
-  qrContent += String(adaAmountForQR, 6);
+  qrContent += adaAmountForQR;
 
   // Generate and display QR code
   qrSprite->fillSprite(TFT_WHITE);
@@ -212,8 +245,13 @@ void displaySuccessAndUpdateHash(TFT_eSPI &display, int transactionId,
   display.drawString("Payment Received!", display.width() / 2,
                      display.height() / 2);
 
+  // Set success state and start timer
+  isShowingSuccess = true;
+  successStartTime = millis();
+
   Serial.print("Payment received! Transaction hash: ");
   Serial.println(txHash);
+  Serial.println("Success message will be shown for 10 seconds");
 }
 
 // Display QR code with call to action
@@ -225,7 +263,8 @@ void displayWaitingMessage(TFT_eSPI &display, int transactionId,
 
   // For QR code, use full amount including ID (lovelaceAmount already has ID
   // added)
-  float adaAmountForQR = (float)lovelaceAmount / 1000000.0;
+  // Format using integer arithmetic to avoid floating point precision issues
+  String adaAmountForQR = formatLovelaceToADA(lovelaceAmount);
 
   // Only draw static elements on initial draw
   if (initialDraw) {
@@ -236,7 +275,7 @@ void displayWaitingMessage(TFT_eSPI &display, int transactionId,
     String qrContent = "web+cardano:";
     qrContent += PAYMENT_ADDRESS;
     qrContent += "?amount=";
-    qrContent += String(adaAmountForQR, 8);
+    qrContent += adaAmountForQR;
 
     Serial.print("[Transaction Check] QR content: ");
     Serial.println(qrContent);
@@ -312,6 +351,17 @@ void displayNewTransactionQR(TFT_eSPI *display, int transactionId,
 
 void transactionQRUpdate(TFT_eSPI &display) {
   unsigned long currentTime = millis();
+
+  // Check if success message should be cleared (after 10 seconds)
+  if (isShowingSuccess) {
+    if (currentTime - successStartTime >= SUCCESS_DISPLAY_TIME) {
+      // Clear screen to blank
+      display.fillScreen(TFT_BLACK);
+      isShowingSuccess = false;
+      Serial.println("Success message cleared, returning to blank screen");
+    }
+    return; // Don't check for payments while showing success
+  }
 
   // If waiting for payment, check for payment
   if (isWaitingForPayment && waitingTransactionId != -1) {
